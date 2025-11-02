@@ -361,7 +361,7 @@ GameObject:
   - component: {fileID: 73165147}
   - component: {fileID: 73165146}
   m_Layer: 5
-  m_Name: SkillButton4
+  m_Name: BackButton4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -430,7 +430,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 73165147}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1092487303}
+        m_TargetAssemblyTypeName: BattleSystem, Assembly-CSharp
+        m_MethodName: OnBackButton
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &73165147
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1239,7 +1251,7 @@ GameObject:
   - component: {fileID: 501409358}
   - component: {fileID: 501409357}
   m_Layer: 5
-  m_Name: GiftButton4
+  m_Name: BackButton4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1308,7 +1320,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 501409358}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1092487303}
+        m_TargetAssemblyTypeName: BattleSystem, Assembly-CSharp
+        m_MethodName: OnBackButton
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &501409358
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1360,7 +1384,7 @@ GameObject:
   - component: {fileID: 567138356}
   - component: {fileID: 567138355}
   m_Layer: 5
-  m_Name: ItemButton4
+  m_Name: BackButton4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1429,7 +1453,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 567138356}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1092487303}
+        m_TargetAssemblyTypeName: BattleSystem, Assembly-CSharp
+        m_MethodName: OnBackButton
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &567138356
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1684,7 +1720,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 636089748}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1092487303}
+        m_TargetAssemblyTypeName: BattleSystem, Assembly-CSharp
+        m_MethodName: OnItemButton
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &636089748
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2004,13 +2052,13 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: 
+      - m_Target: {fileID: 1092487303}
+        m_TargetAssemblyTypeName: BattleSystem, Assembly-CSharp
+        m_MethodName: OnBattleButton
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -2147,7 +2195,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u793C\u72694"
+  m_text: "\u8FD4\u56DE"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 2f4a8f8e18ecece4a9a73968cc361ee7, type: 2}
   m_sharedMaterial: {fileID: -4567308400034549707, guid: 2f4a8f8e18ecece4a9a73968cc361ee7, type: 2}
@@ -2846,10 +2894,10 @@ MonoBehaviour:
   dialogText: {fileID: 575740267}
   playerHUD: {fileID: 1431696864}
   enemyHUD: {fileID: 925693556}
-  rootPanel: {fileID: 0}
-  skillsPanel: {fileID: 0}
-  itemsPanel: {fileID: 0}
-  giftsPanel: {fileID: 0}
+  rootPanel: {fileID: 660219057}
+  skillsPanel: {fileID: 894782153}
+  itemsPanel: {fileID: 1962467633}
+  giftsPanel: {fileID: 2129800858}
 --- !u!4 &1092487304
 Transform:
   m_ObjectHideFlags: 0
@@ -3131,7 +3179,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u6280\u80FD4"
+  m_text: "\u8FD4\u56DE"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 2f4a8f8e18ecece4a9a73968cc361ee7, type: 2}
   m_sharedMaterial: {fileID: -4567308400034549707, guid: 2f4a8f8e18ecece4a9a73968cc361ee7, type: 2}
@@ -3716,7 +3764,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1328502885}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1092487303}
+        m_TargetAssemblyTypeName: BattleSystem, Assembly-CSharp
+        m_MethodName: OnGiftButton
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1328502885
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4913,7 +4973,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u7269\u54C14"
+  m_text: "\u8FD4\u56DE"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 2f4a8f8e18ecece4a9a73968cc361ee7, type: 2}
   m_sharedMaterial: {fileID: -4567308400034549707, guid: 2f4a8f8e18ecece4a9a73968cc361ee7, type: 2}
