@@ -1,0 +1,12 @@
+Font: Daydream  Style: Regular
+Point Size: 186   SP/PD Ratio: 4.8%
+
+Characters included: 20/20
+Missing characters: 0
+Excluded characters: 0
+
+Characters missing from font file:
+----------------------------------------
+
+Characters excluded from packing:
+----------------------------------------
