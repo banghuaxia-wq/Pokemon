@@ -22,7 +22,8 @@ public class TooltipTriggerWorld : MonoBehaviour
     {
         if (isEnabled)
         {
-            TooltipSystem.Show(content, header);
+            // 场景物体需要放大镜才显示tooltip
+            TooltipSystem.Show(content, header, requireZoom: true);
         }
     }
 

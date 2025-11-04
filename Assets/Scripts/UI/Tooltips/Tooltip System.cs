@@ -28,7 +28,7 @@ public class TooltipSystem : MonoBehaviour
         }
     }
 
-    public static void Show(string content, string header = "")
+    public static void Show(string content, string header = "", bool requireZoom = false)
     {
         // 检查TooltipSystem和tooltip是否存在且未被销毁
         if (current == null || current.tooltip == null)
@@ -36,8 +36,8 @@ public class TooltipSystem : MonoBehaviour
             return;
         }
         
-        // 检查放大镜是否开启，只有开启时才显示tooltip
-        if (!buttonScript.IsZoomActive())
+        // 如果需要放大镜，检查放大镜是否开启
+        if (requireZoom && !buttonScript.IsZoomActive())
         {
             return;
         }
