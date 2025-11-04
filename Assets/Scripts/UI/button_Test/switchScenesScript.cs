@@ -6,7 +6,8 @@ using UnityEngine.UI;
 
 public class switchScenesScript : MonoBehaviour
 {
-    public Animator startScreenAnimator;
+    public Animator startScreenAnimator = null;
+    public int sceneIndex;
     // Start is called before the first frame update
     void Start()
     {
@@ -23,12 +24,12 @@ public class switchScenesScript : MonoBehaviour
     {
         startScreenAnimator.SetBool("isPlay", true);
         //gameObject.GetComponent<Button>().interactable = false;
-        Invoke("goToGameScene", 1.1f);
+        Invoke("goToScene", 1.1f);
     }
 
-    public void goToGameScene()
+    public void goToScene()
     {
-        SceneManager.LoadScene(1);
+        SceneManager.LoadScene(sceneIndex);
         //gameObject.GetComponent<Button>().interactable = true;
     }
 }
