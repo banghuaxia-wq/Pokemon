@@ -36,6 +36,12 @@ public class TooltipSystem : MonoBehaviour
             return;
         }
         
+        // 检查放大镜是否开启，只有开启时才显示tooltip
+        if (!buttonScript.IsZoomActive())
+        {
+            return;
+        }
+        
         current.tooltip.SetText(content, header);
         current.tooltip.gameObject.SetActive(true);
     }

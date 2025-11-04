@@ -14,10 +14,14 @@ public class buttonScript : MonoBehaviour
     public GameObject toClose = null;
     public GameObject zoomMag = null;
 
+    // 静态实例，用于其他脚本访问放大镜状态
+    private static buttonScript instance;
+    public static buttonScript Instance => instance;
+
     // Start is called before the first frame update
     void Start()
     {
-        
+        instance = this;
     }
 
     // Update is called once per frame
@@ -31,6 +35,9 @@ public class buttonScript : MonoBehaviour
         {
             zoomMag.SetActive(false);
             isZoom = false;
+            
+            // 关闭放大镜时隐藏tooltip
+            TooltipSystem.Hide();
         }
     }
 
@@ -47,6 +54,7 @@ public class buttonScript : MonoBehaviour
     {
         isZoom = true;
     }
+    
     public void openZoom()
     {
         if (zoomMag != null)
@@ -64,7 +72,12 @@ public class buttonScript : MonoBehaviour
             zoomMag.GetComponent<RectTransform>().anchoredPosition = localPoint;
         }
     }
-
-
-
+    
+    /// <summary>
+    /// 静态方法 - 检查放大镜是否开启
+    /// </summary>
+    public static bool IsZoomActive()
+    {
+        return instance != null && instance.isZoom;
+    }
 }
