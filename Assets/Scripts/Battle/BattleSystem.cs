@@ -30,6 +30,11 @@ public class BattleSystem : MonoBehaviour
     [SerializeField] private CanvasGroup itemsPanel;
     [SerializeField] private CanvasGroup giftsPanel;
     private CanvasGroup[] _all;
+    
+    [Header("技能按钮")]
+    [SerializeField] private GameObject skillButton1;
+    [SerializeField] private GameObject skillButton2;
+    [SerializeField] private GameObject skillButton3;
     private void Awake()
     {
         _all = new[] { rootPanel, skillsPanel, itemsPanel, giftsPanel };
@@ -147,6 +152,7 @@ public class BattleSystem : MonoBehaviour
     /// </summary>
     public void OnBattleButton()
     {
+        UpdateSkillButtons();
         StartCoroutine(ShowPanelWithFade(skillsPanel));
     }
     
@@ -203,5 +209,67 @@ public class BattleSystem : MonoBehaviour
         
         // TODO: 保存背包数据到存档
         // TODO: 返回地图场景
+    }
+    
+    /// <summary>
+    /// 更新技能按钮显示
+    /// </summary>
+    private void UpdateSkillButtons()
+    {
+        // 检查玩家宝可梦是否存在
+        if (playerPokemon == null)
+        {
+            Debug.LogWarning("玩家宝可梦为空，无法更新技能按钮");
+            return;
+        }
+        
+        // 获取技能列表
+        var skills = playerPokemon.GetSkills();
+        
+        // 创建技能按钮数组
+        GameObject[] skillButtons = new GameObject[] { skillButton1, skillButton2, skillButton3 };
+        
+        // 遍历三个技能按钮
+        for (int i = 0; i < skillButtons.Length; i++)
+        {
+            // 检查按钮是否存在
+            if (skillButtons[i] == null)
+            {
+                Debug.LogWarning($"技能按钮{i + 1}未赋值！");
+                continue;
+            }
+            
+            // 如果技能数量大于当前索引，显示技能
+            if (i < skills.Count && skills[i] != null)
+            {
+                // 显示按钮
+                skillButtons[i].SetActive(true);
+                
+                // 查找Text_Battle子物体
+                Transform textTransform = skillButtons[i].transform.Find("Text_Battle");
+                if (textTransform != null)
+                {
+                    TextMeshProUGUI textComponent = textTransform.GetComponent<TextMeshProUGUI>();
+                    if (textComponent != null)
+                    {
+                        // 设置技能名称
+                        textComponent.text = skills[i].skillName;
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"技能按钮{i + 1}的Text_Battle没有TextMeshProUGUI组件");
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning($"技能按钮{i + 1}找不到Text_Battle子物体");
+                }
+            }
+            else
+            {
+                // 技能不足，隐藏按钮
+                skillButtons[i].SetActive(false);
+            }
+        }
     }
 }

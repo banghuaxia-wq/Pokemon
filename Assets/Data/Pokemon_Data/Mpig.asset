@@ -16,4 +16,7 @@ MonoBehaviour:
   baseHP: 500
   baseAttack: 50
   baseDefense: 50
-  skills: []
+  skills:
+  - {fileID: 11400000, guid: 017d02f6703dafc438168b1f4ff4fac0, type: 2}
+  - {fileID: 11400000, guid: 8dd76a50096377d44b4fe3d012c46c3e, type: 2}
+  - {fileID: 0}
