@@ -22,6 +22,15 @@ public class PackageManager : MonoBehaviour
 
     private void Start()
     {
+        // 延迟一帧初始化，确保所有 PackageUIItem 都已初始化
+        StartCoroutine(DelayedInitialize());
+    }
+
+    private System.Collections.IEnumerator DelayedInitialize()
+    {
+        // 等待一帧，让所有 Start() 执行完毕
+        yield return null;
+        
         // 自动查找所有格子（如果没有手动拖入）
         if (warehouseSlots.Count == 0)
         {
@@ -29,7 +38,7 @@ public class PackageManager : MonoBehaviour
             GameObject warehousePanel = GameObject.Find("Scroll View_Warehouse");
             if (warehousePanel != null)
             {
-                PackageUIItem[] slots = warehousePanel.GetComponentsInChildren<PackageUIItem>();
+                PackageUIItem[] slots = warehousePanel.GetComponentsInChildren<PackageUIItem>(true); // true = 包括未激活的
                 warehouseSlots.AddRange(slots);
                 Debug.Log($"[PackageManager] 在仓库中找到 {slots.Length} 个格子（预期 40 个）");
             }
@@ -45,7 +54,7 @@ public class PackageManager : MonoBehaviour
             GameObject bagPanel = GameObject.Find("Scroll View_Bag");
             if (bagPanel != null)
             {
-                PackageUIItem[] slots = bagPanel.GetComponentsInChildren<PackageUIItem>();
+                PackageUIItem[] slots = bagPanel.GetComponentsInChildren<PackageUIItem>(true); // true = 包括未激活的
                 bagSlots.AddRange(slots);
                 Debug.Log($"[PackageManager] 在背包中找到 {slots.Length} 个格子（预期 20 个）");
             }
