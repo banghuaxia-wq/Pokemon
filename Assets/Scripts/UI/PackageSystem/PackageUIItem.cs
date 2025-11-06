@@ -3,8 +3,14 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.EventSystems;
 
-public class PackageUIItem : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
+public class PackageUIItem : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IBeginDragHandler, IDragHandler, IEndDragHandler, IDropHandler
 {
+    [Header("存储位置")]
+    [Tooltip("这个格子属于仓库还是背包？")]
+    public bool isWarehouseSlot = true; // true=仓库, false=背包
+    
+    [Tooltip("这个格子在列表中的索引")]
+    public int slotIndex = 0;
     // UI 组件的引用，通过 Inspector 拖拽赋值
     [Header("UI References")]
     [SerializeField] private Image iconImage;           // 物品图标
@@ -250,6 +256,90 @@ public class PackageUIItem : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     {
         Debug.Log($"[PackageUIItem] 结束拖拽: {currentItemData?.itemName}");
         CleanupDragIcon();
+    }
+    
+    /// <summary>
+    /// 接收拖拽放下
+    /// </summary>
+    public void OnDrop(PointerEventData eventData)
+    {
+        // 获取被拖拽的对象
+        GameObject draggedObj = eventData.pointerDrag;
+        if (draggedObj == null)
+        {
+            return;
+        }
+        
+        PackageUIItem draggedSlot = draggedObj.GetComponent<PackageUIItem>();
+        if (draggedSlot == null || draggedSlot == this)
+        {
+            return;
+        }
+        
+        // 检查是否跨容器拖拽（仓库<->背包）
+        bool isCrossContainer = draggedSlot.isWarehouseSlot != this.isWarehouseSlot;
+        
+        Debug.Log($"[PackageUIItem] 拖拽交换: {draggedSlot.currentItemData?.itemName} <-> {this.currentItemData?.itemName}, 跨容器={isCrossContainer}");
+        
+        // 交换UI显示
+        ItemData tempData = this.currentItemData;
+        int tempCount = this.currentItemCount;
+        
+        this.UpdateSlot(draggedSlot.currentItemData, draggedSlot.currentItemCount);
+        draggedSlot.UpdateSlot(tempData, tempCount);
+        
+        // 同步到ItemInventory
+        SyncToInventory();
+        draggedSlot.SyncToInventory();
+        
+        Debug.Log($"[PackageUIItem] 交换完成并已同步到ItemInventory");
+    }
+    
+    /// <summary>
+    /// 公共方法：同步当前格子数据到ItemInventory（供外部调用）
+    /// </summary>
+    public void SyncDataToInventory()
+    {
+        SyncToInventory();
+    }
+    
+    /// <summary>
+    /// 同步当前格子数据到ItemInventory
+    /// </summary>
+    private void SyncToInventory()
+    {
+        if (ItemInventory.Instance == null)
+        {
+            Debug.LogWarning("[PackageUIItem] ItemInventory未找到，无法同步数据");
+            return;
+        }
+        
+        if (isWarehouseSlot)
+        {
+            // 同步到仓库
+            if (slotIndex >= 0 && slotIndex < ItemInventory.Instance.warehouseItems.Count)
+            {
+                ItemInventory.Instance.warehouseItems[slotIndex] = new ItemSlotData(currentItemData, currentItemCount);
+                Debug.Log($"[PackageUIItem] 同步到仓库格子 {slotIndex}: {currentItemData?.itemName ?? "空"} x{currentItemCount}");
+            }
+            else
+            {
+                Debug.LogWarning($"[PackageUIItem] 仓库索引越界: slotIndex={slotIndex}, 仓库容量={ItemInventory.Instance.warehouseItems.Count}");
+            }
+        }
+        else
+        {
+            // 同步到背包
+            if (slotIndex >= 0 && slotIndex < ItemInventory.Instance.bagItems.Count)
+            {
+                ItemInventory.Instance.bagItems[slotIndex] = new ItemSlotData(currentItemData, currentItemCount);
+                Debug.Log($"[PackageUIItem] 同步到背包格子 {slotIndex}: {currentItemData?.itemName ?? "空"} x{currentItemCount}");
+        }
+        else
+        {
+                Debug.LogWarning($"[PackageUIItem] 背包索引越界: slotIndex={slotIndex}, 背包容量={ItemInventory.Instance.bagItems.Count}");
+            }
+        }
     }
     
     /// <summary>

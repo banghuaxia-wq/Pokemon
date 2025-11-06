@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,6 +7,10 @@ using UnityEngine;
 /// </summary>
 public class PackageManager : MonoBehaviour
 {
+    // 单例实例
+    private static PackageManager instance;
+    public static PackageManager Instance => instance;
+
     [Header("UI 引用")]
     [Tooltip("仓库格子列表")]
     public List<PackageUIItem> warehouseSlots = new List<PackageUIItem>();
@@ -20,13 +25,38 @@ public class PackageManager : MonoBehaviour
     [Tooltip("测试物品数量")]
     public int testItemCount = 99;
 
+    private CanvasGroup canvasGroup;
+
+    private void Awake()
+    {
+        // 设置单例
+        if (instance == null)
+        {
+            instance = this;
+        }
+        else if (instance != this)
+        {
+            Debug.LogWarning("[PackageManager] 场景中存在多个 PackageManager，这可能导致问题");
+        }
+
+        // 获取或添加 CanvasGroup 组件
+        canvasGroup = GetComponent<CanvasGroup>();
+        if (canvasGroup == null)
+        {
+            canvasGroup = gameObject.AddComponent<CanvasGroup>();
+        }
+
+        // 初始隐藏面板
+        HidePanel();
+    }
+
     private void Start()
     {
         // 延迟一帧初始化，确保所有 PackageUIItem 都已初始化
         StartCoroutine(DelayedInitialize());
     }
 
-    private System.Collections.IEnumerator DelayedInitialize()
+    private IEnumerator DelayedInitialize()
     {
         // 等待一帧，让所有 Start() 执行完毕
         yield return null;
@@ -62,6 +92,111 @@ public class PackageManager : MonoBehaviour
             {
                 Debug.LogWarning("[PackageManager] 未找到 'Scroll View_Bag'！请检查命名或手动拖入格子。");
             }
+        }
+
+        // 设置格子索引和容器类型
+        InitializeSlotIndices();
+
+        // 从 ItemInventory 加载数据
+        LoadItemsFromInventory();
+    }
+    
+    /// <summary>
+    /// 初始化格子索引和容器类型
+    /// </summary>
+    private void InitializeSlotIndices()
+    {
+        // 设置仓库格子
+        for (int i = 0; i < warehouseSlots.Count; i++)
+        {
+            if (warehouseSlots[i] != null)
+            {
+                warehouseSlots[i].isWarehouseSlot = true;
+                warehouseSlots[i].slotIndex = i;
+            }
+        }
+        
+        // 设置背包格子
+        for (int i = 0; i < bagSlots.Count; i++)
+        {
+            if (bagSlots[i] != null)
+            {
+                bagSlots[i].isWarehouseSlot = false;
+                bagSlots[i].slotIndex = i;
+            }
+        }
+        
+        Debug.Log($"[PackageManager] 已初始化 {warehouseSlots.Count} 个仓库格子和 {bagSlots.Count} 个背包格子的索引");
+    }
+
+    /// <summary>
+    /// 从 ItemInventory 加载物品数据到UI
+    /// </summary>
+    public void LoadItemsFromInventory()
+    {
+        if (ItemInventory.Instance == null)
+        {
+            Debug.LogWarning("[PackageManager] ItemInventory 未找到！");
+            return;
+        }
+
+        // 加载仓库物品
+        for (int i = 0; i < warehouseSlots.Count && i < ItemInventory.Instance.warehouseItems.Count; i++)
+        {
+            ItemSlotData slotData = ItemInventory.Instance.warehouseItems[i];
+            warehouseSlots[i].UpdateSlot(slotData.itemData, slotData.count);
+        }
+
+        // 加载背包物品
+        for (int i = 0; i < bagSlots.Count && i < ItemInventory.Instance.bagItems.Count; i++)
+        {
+            ItemSlotData slotData = ItemInventory.Instance.bagItems[i];
+            bagSlots[i].UpdateSlot(slotData.itemData, slotData.count);
+        }
+
+        Debug.Log("[PackageManager] 已从 ItemInventory 加载物品数据");
+    }
+
+    /// <summary>
+    /// 打开背包面板
+    /// </summary>
+    public void OpenPanel()
+    {
+        ShowPanel();
+        LoadItemsFromInventory(); // 刷新显示
+    }
+
+    /// <summary>
+    /// 关闭背包面板
+    /// </summary>
+    public void ClosePanel()
+    {
+        HidePanel();
+    }
+
+    /// <summary>
+    /// 显示面板
+    /// </summary>
+    private void ShowPanel()
+    {
+        if (canvasGroup != null)
+        {
+            canvasGroup.alpha = 1f;
+            canvasGroup.interactable = true;
+            canvasGroup.blocksRaycasts = true;
+        }
+    }
+
+    /// <summary>
+    /// 隐藏面板
+    /// </summary>
+    private void HidePanel()
+    {
+        if (canvasGroup != null)
+        {
+            canvasGroup.alpha = 0f;
+            canvasGroup.interactable = false;
+            canvasGroup.blocksRaycasts = false;
         }
     }
 

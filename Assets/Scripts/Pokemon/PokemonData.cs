@@ -6,6 +6,13 @@ public class PokemonData : ScriptableObject
 {
 	[Header("基础信息")]
 	public string displayName;
+	
+	[Tooltip("宝可梦图标")]
+	public Sprite icon;
+	
+	[Header("视觉表现")]
+	[Tooltip("战斗场景中使用的宝可梦 Prefab（包含模型、动画等）")]
+	public GameObject battlePrefab;
 
 	[Header("基础数值")]
 	public int baseHP = 100;

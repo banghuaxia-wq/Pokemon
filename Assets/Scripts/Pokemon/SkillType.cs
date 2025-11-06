@@ -5,10 +5,11 @@ using UnityEngine;
 /// </summary>
 public enum SkillType
 {
-    Physical,       // 物理攻击（近战、撞击等）
-    Special,        // 特殊攻击（远程、魔法等）
-    Status,         // 状态技能（buff、debuff等）
-    Heal            // 治疗技能
+    TackleAttack,   // 撞击攻击（宝可梦本体抖动）
+    WhipAttack,     // 鞭打攻击（生成鞭子特效）
+    DefenseStance,  // 防御姿态（生成护盾特效，提升防御力）
+    Heal,           // 治疗技能（生成治疗特效，恢复HP）
+    Taunt           // 嘲讽技能（强制敌人攻击自己，多人战斗用）
 }
 
 /// <summary>

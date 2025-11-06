@@ -41,13 +41,36 @@ public class buttonScript : MonoBehaviour
         }
     }
 
-    public void openActBag()
+    /// <summary>
+    /// 打开物品背包（BagButton专用）
+    /// </summary>
+    public void OpenItemBag()
     {
-        toOpen.transform.SetAsLastSibling();
-        toOpen.SetActive(true);
-        toClose.SetActive(false);
-        //toOpen.GetComponent<Animator>().SetBool("isOpen", true);
-
+        if (PackageManager.Instance != null)
+        {
+            PackageManager.Instance.OpenPanel();
+            Debug.Log("[buttonScript] 已打开物品背包");
+        }
+        else
+        {
+            Debug.LogError("[buttonScript] 未找到 PackageManager！请确保场景中有 PackagePanel 并挂载了 PackageManager 脚本");
+        }
+    }
+    
+    /// <summary>
+    /// 打开宝可梦菜单（PokemonBagButton专用）
+    /// </summary>
+    public void OpenPokemonMenu()
+    {
+        if (PokemonMenuManager.Instance != null)
+        {
+            PokemonMenuManager.Instance.OpenMenu();
+            Debug.Log("[buttonScript] 已打开宝可梦背包");
+        }
+        else
+        {
+            Debug.LogError("[buttonScript] 未找到 PokemonMenuManager！请确保场景中有 PokemonMenuPanel 并挂载了 PokemonMenuManager 脚本");
+        }
     }
 
     public void zoomTrue()
@@ -72,7 +95,7 @@ public class buttonScript : MonoBehaviour
             zoomMag.GetComponent<RectTransform>().anchoredPosition = localPoint;
         }
     }
-    
+
     /// <summary>
     /// 静态方法 - 检查放大镜是否开启
     /// </summary>

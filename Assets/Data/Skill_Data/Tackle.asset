@@ -9,11 +9,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 45459e79d6078eb43bf99662ee12be85, type: 3}
-  m_Name: Whip
+  m_Script: {fileID: 11500000, guid: afae58b43db2f4843a50af54f4a2ec3e, type: 3}
+  m_Name: Tackle
   m_EditorClassIdentifier: 
-  itemID: 3
-  itemName: "\u97AD\u5B50"
-  itemIcon: {fileID: 21300000, guid: 19fab4d9ed0e61d47bdaed991db7e16b, type: 3}
-  maxStackSize: 1
-  description: "\u54BB\u54BB\u54BB~"
+  skillName: "\u649E\u51FB"
+  description: "\u51B2\u649E\u9020\u6210\u4F24\u5BB3"
+  skillType: 0
+  targetType: 0
+  power: 40
+  maxPP: 35
+  accuracy: 100
+  hasSpecialEffect: 0
+  specialEffectDesc: 

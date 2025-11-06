@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: Boss
   m_EditorClassIdentifier: 
   displayName: "\u51B0\u6DC7\u51CC\u602A\u517D"
+  icon: {fileID: 21300000, guid: 43322ca6dcd992440b895c38ada7ec61, type: 3}
+  battlePrefab: {fileID: 7484563396801440321, guid: 3a9e3c30b98d3624f80abbfd8594bbaf, type: 3}
   baseHP: 1000
   baseAttack: 200
   baseDefense: 30

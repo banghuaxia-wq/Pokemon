@@ -13,20 +13,44 @@ public class PlayerInventory : MonoBehaviour
 	[Tooltip("宝可梦仓库")]
 	public List<PlayerPokemonData> pokemonStorage = new List<PlayerPokemonData>();
 	
+	[Header("初始化设置")]
+	[Tooltip("初始默认宝可梦（游戏开始时自动添加）")]
+	public PokemonData initialPokemon;
+	
 	private static PlayerInventory instance;
 	public static PlayerInventory Instance => instance;
 	
 	private void Awake()
 	{
-		// 单例模式
+		// 单例模式（由父物体 PermanentManager 统一管理持久化）
 		if (instance == null)
 		{
 			instance = this;
-			DontDestroyOnLoad(gameObject);
+			
+			// 初始化默认宝可梦（只在第一次创建时执行）
+			InitializeDefaultPokemon();
+			
+			Debug.Log("[PlayerInventory] 单例已初始化");
 		}
-		else
+		else if (instance != this)
 		{
+			Debug.LogWarning("[PlayerInventory] 检测到重复实例，销毁当前物体");
 			Destroy(gameObject);
+		}
+	}
+	
+	/// <summary>
+	/// 初始化默认宝可梦（游戏开始时）
+	/// </summary>
+	private void InitializeDefaultPokemon()
+	{
+		// 如果背包为空且有初始宝可梦数据，添加一只初始宝可梦
+		if (pokemonParty.Count == 0 && initialPokemon != null)
+		{
+			PlayerPokemonData startPokemon = new PlayerPokemonData(initialPokemon);
+			startPokemon.nickname = ""; // 使用种族名
+			AddToParty(startPokemon);
+			Debug.Log($"[PlayerInventory] 已添加初始宝可梦: {initialPokemon.displayName}");
 		}
 	}
 	
@@ -78,6 +102,9 @@ public class PlayerInventory : MonoBehaviour
 		{
 			Debug.Log($"捕获了 {wildPokemonData.displayName}！");
 		}
+		
+		// 刷新队伍面板UI（如果存在）
+		TeamPanelUI.RefreshAllTeamPanels();
 	}
 	
 	/// <summary>

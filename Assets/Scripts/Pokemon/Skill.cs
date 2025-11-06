@@ -30,7 +30,7 @@ public class Skill
 	/// <summary>
 	/// 技能类型（从数据中获取）
 	/// </summary>
-	public SkillType skillType => data != null ? data.skillType : SkillType.Physical;
+	public SkillType skillType => data != null ? data.skillType : SkillType.TackleAttack;
 	
 	/// <summary>
 	/// 是否还有PP可用

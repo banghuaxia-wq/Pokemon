@@ -16,7 +16,7 @@ public class SkillData : ScriptableObject
 
 	[Header("技能类型")]
 	[Tooltip("技能类型（决定动画类型）")]
-	public SkillType skillType = SkillType.Physical;
+	public SkillType skillType = SkillType.TackleAttack;
 	
 	[Tooltip("目标类型")]
 	public SkillTarget targetType = SkillTarget.Enemy;

@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b536c6c450ce2714abd58f00efc862cd, type: 3}
+  m_Name: SkillAnimationConfig
+  m_EditorClassIdentifier: 
+  whipAttackPrefab: {fileID: 7163275957774324588, guid: d83c0674536151749a44b7106b55d9be, type: 3}
+  shieldPrefab: {fileID: 7693140827325417593, guid: cedbac2f75a1fef48a5dbf6e871a3e46, type: 3}
+  healPrefab: {fileID: 1939842175366340232, guid: 71ba8f3b7514a1f45810789f85879b18, type: 3}
+  tackleShakeAmount: 0.2
+  tackleDuration: 0.5
+  whipEffectDuration: 1
+  shieldEffectDuration: 1.5
+  healEffectDuration: 1.2

@@ -101,6 +101,7 @@ public class PackageContainer : MonoBehaviour, IDropHandler
                     int addCount = Mathf.Min(canAdd, remainingCount);
                     
                     slot.UpdateSlot(itemData, slot.GetItemCount() + addCount);
+                    slot.SyncDataToInventory(); // 同步数据
                     remainingCount -= addCount;
                     
                     Debug.Log($"[PackageContainer] 堆叠 {addCount} 个到现有格子，剩余 {remainingCount} 个");
@@ -109,6 +110,7 @@ public class PackageContainer : MonoBehaviour, IDropHandler
                     {
                         // 全部堆叠完毕，清空源格子
                         sourceItem.UpdateSlot(null, 0);
+                        sourceItem.SyncDataToInventory(); // 同步数据
                         return;
                     }
                 }
@@ -121,7 +123,9 @@ public class PackageContainer : MonoBehaviour, IDropHandler
                 if (emptySlot != null)
                 {
                     emptySlot.UpdateSlot(itemData, remainingCount);
+                    emptySlot.SyncDataToInventory(); // 同步数据
                     sourceItem.UpdateSlot(null, 0);
+                    sourceItem.SyncDataToInventory(); // 同步数据
                     Debug.Log($"[PackageContainer] 剩余 {remainingCount} 个放入空格子");
                 }
                 else
@@ -139,7 +143,9 @@ public class PackageContainer : MonoBehaviour, IDropHandler
             if (emptySlot != null)
             {
                 emptySlot.UpdateSlot(itemData, itemCount);
+                emptySlot.SyncDataToInventory(); // 同步数据
                 sourceItem.UpdateSlot(null, 0);
+                sourceItem.SyncDataToInventory(); // 同步数据
                 Debug.Log($"[PackageContainer] 转移 {itemCount} 个到空格子");
             }
             else
@@ -181,6 +187,7 @@ public class PackageContainer : MonoBehaviour, IDropHandler
                     int addCount = Mathf.Min(canAdd, remainingTransfer);
                     
                     slot.UpdateSlot(itemData, slot.GetItemCount() + addCount);
+                    slot.SyncDataToInventory(); // 同步数据
                     remainingTransfer -= addCount;
                     
                     if (remainingTransfer <= 0)
@@ -197,6 +204,7 @@ public class PackageContainer : MonoBehaviour, IDropHandler
                 if (emptySlot != null)
                 {
                     emptySlot.UpdateSlot(itemData, remainingTransfer);
+                    emptySlot.SyncDataToInventory(); // 同步数据
                     remainingTransfer = 0;
                 }
                 else
@@ -208,6 +216,7 @@ public class PackageContainer : MonoBehaviour, IDropHandler
             // 更新源格子（保留未能转移的部分）
             int actualTransferred = transferCount - remainingTransfer;
             sourceItem.UpdateSlot(itemData, itemCount - actualTransferred);
+            sourceItem.SyncDataToInventory(); // 同步数据
         }
         else
         {
@@ -216,7 +225,9 @@ public class PackageContainer : MonoBehaviour, IDropHandler
             if (emptySlot != null)
             {
                 emptySlot.UpdateSlot(itemData, transferCount);
+                emptySlot.SyncDataToInventory(); // 同步数据
                 sourceItem.UpdateSlot(itemData, remainCount);
+                sourceItem.SyncDataToInventory(); // 同步数据
                 Debug.Log($"[PackageContainer] 转移一半：{transferCount} 个到空格子");
             }
             else

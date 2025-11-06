@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: Mpig
   m_EditorClassIdentifier: 
   displayName: "M\u732A"
+  icon: {fileID: 21300000, guid: c62be9cf28e28374fbb0baca100b7ba0, type: 3}
+  battlePrefab: {fileID: 4748803475915633067, guid: 74804d8592e05f345a7436501e4570dc, type: 3}
   baseHP: 500
   baseAttack: 50
   baseDefense: 50
