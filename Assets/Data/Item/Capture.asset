@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 45459e79d6078eb43bf99662ee12be85, type: 3}
-  m_Name: Rope
+  m_Name: Capture
   m_EditorClassIdentifier: 
-  itemID: 2
-  itemName: "\u7EF3\u5B50"
-  itemIcon: {fileID: 21300000, guid: cc793745dfe51724ea6d57eb339d253b, type: 3}
+  itemID: 4
+  itemName: "\u6355\u6349\u7F51"
+  itemIcon: {fileID: 21300000, guid: 6dba03cde55d451439498b814ef188f6, type: 3}
   maxStackSize: 99
-  description: "\u80FD\u6346\u7ED1\u4E1C\u897F"
-  itemType: 2
+  description: "\u80FD\u591F\u6355\u6349\u597D\u611F\u5EA6\u6EE1\u7684\u5B9D\u53EF\u68A6"
+  itemType: 1
   healAmount: 0

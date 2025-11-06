@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skillName: "\u5632\u8BBD"
   description: "\u5438\u5F15\u654C\u4EBA\u653B\u51FB"
-  skillType: 2
+  skillType: 4
   targetType: 0
   power: 0
   maxPP: 15

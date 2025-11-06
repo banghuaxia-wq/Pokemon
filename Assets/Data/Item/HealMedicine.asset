@@ -18,4 +18,4 @@ MonoBehaviour:
   maxStackSize: 99
   description: "\u53EF\u4EE5\u7ED9\u5DF1\u65B9\u6216\u5BF9\u65B9\u56DE\u590D50\u8840\u91CF"
   itemType: 3
-  healAmount: 100
+  healAmount: 50

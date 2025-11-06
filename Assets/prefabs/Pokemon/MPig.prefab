@@ -136,6 +136,7 @@ MonoBehaviour:
   data: {fileID: 11400000, guid: de5baff130c307649b04f725096b31ae, type: 2}
   _currentHP: 0
   _currentDefense: 0
+  _currentAffinity: 0
   animator: {fileID: 0}
   whipAttackAnimPosition: {fileID: 1740808639211744022}
   shieldAnimPosition: {fileID: 5613133507951309982}
@@ -156,7 +157,7 @@ MonoBehaviour:
   isTransformed: 0
   unlockedSkills:
   - {fileID: 11400000, guid: 8dd76a50096377d44b4fe3d012c46c3e, type: 2}
-  defenseBonus: 0
+  defenseBonus: 30
   forcedSkillType: 4
   enableForcedSkill: 1
 --- !u!1 &4997094493064454727

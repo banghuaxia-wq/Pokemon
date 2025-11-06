@@ -5,7 +5,8 @@ using UnityEngine;
 /// </summary>
 public class AffinityManager : MonoBehaviour
 {
-    private static AffinityManager _instance;
+    // 将 _instance 改为 public，方便在 OnDestroy 中检查而不触发自动创建
+    public static AffinityManager _instance;
     public static AffinityManager Instance
     {
         get
@@ -15,6 +16,7 @@ public class AffinityManager : MonoBehaviour
                 GameObject go = new GameObject("AffinityManager");
                 _instance = go.AddComponent<AffinityManager>();
                 DontDestroyOnLoad(go);
+                Debug.Log("[AffinityManager] 单例已创建");
             }
             return _instance;
         }
@@ -50,6 +52,11 @@ public class AffinityManager : MonoBehaviour
     }
 
     /// <summary>
+    /// 好感度改变事件
+    /// </summary>
+    public event System.Action<int> OnGreenHatFishAffinityChanged;
+    
+    /// <summary>
     /// 增加绿帽鱼的好感度
     /// </summary>
     public void AddGreenHatFishAffinity(int amount)
@@ -57,6 +64,9 @@ public class AffinityManager : MonoBehaviour
         int oldAffinity = greenHatFishAffinity;
         greenHatFishAffinity = Mathf.Clamp(greenHatFishAffinity + amount, MIN_AFFINITY, MAX_AFFINITY);
         Debug.Log($"[AffinityManager] 绿帽鱼好感度: {oldAffinity} → {greenHatFishAffinity} (+{amount})");
+        
+        // 触发事件通知UI更新
+        OnGreenHatFishAffinityChanged?.Invoke(greenHatFishAffinity);
     }
 
     /// <summary>
@@ -66,6 +76,9 @@ public class AffinityManager : MonoBehaviour
     {
         greenHatFishAffinity = Mathf.Clamp(value, MIN_AFFINITY, MAX_AFFINITY);
         Debug.Log($"[AffinityManager] 绿帽鱼好感度设置为: {greenHatFishAffinity}");
+        
+        // 触发事件通知UI更新
+        OnGreenHatFishAffinityChanged?.Invoke(greenHatFishAffinity);
     }
 
     /// <summary>

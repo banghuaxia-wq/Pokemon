@@ -14045,7 +14045,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -952, y: 532}
+  m_AnchoredPosition: {x: -285.74213, y: 532}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1594612645
@@ -17970,6 +17970,7 @@ MonoBehaviour:
   healMedicineData: {fileID: 11400000, guid: ecc0fb6b0a8045f4797eb358553f79c0, type: 2}
   ropeData: {fileID: 11400000, guid: 5ca43d8d9725b284db0293f6aa6529c4, type: 2}
   whipData: {fileID: 11400000, guid: 58207c6d57dfdce48b62ad6989885fee, type: 2}
+  captureData: {fileID: 11400000, guid: 59798d381dbfd77418f352cd54486d89, type: 2}
   warehouseCapacity: 40
   bagCapacity: 20
 --- !u!1 &2037546937

@@ -54,8 +54,13 @@ public class GiftSystem : MonoBehaviour
     /// </summary>
     private IEnumerator ProcessGiftEffect(ItemData item, PokemonFromData target)
     {
+        // 检查特殊道具：捕捉道具 = 捕捉宝可梦
+        if (item.itemName == "Capture" || item.itemName == "捕捉道具")
+        {
+            yield return ProcessCapture(item, target);
+        }
         // 检查特殊道具：绳子 + M猪 = 形态变化
-        if ((item.itemName == "绳子" || item.itemName == "Rope") && 
+        else if ((item.itemName == "绳子" || item.itemName == "Rope") && 
             (target.data.displayName.Contains("M猪") || target.data.displayName.Contains("MPig")))
         {
             yield return ProcessRopeForMPig(item, target);
@@ -79,6 +84,37 @@ public class GiftSystem : MonoBehaviour
             // TODO: 这里可以添加好感度系统
             yield return new WaitForSeconds(1f);
         }
+    }
+    
+    /// <summary>
+    /// 处理捕捉道具（好感度满100才能捕捉）
+    /// </summary>
+    private IEnumerator ProcessCapture(ItemData item, PokemonFromData target)
+    {
+        Debug.Log($"[GiftSystem] 尝试捕捉 {target.pokemonName}，当前好感度：{target.GetAffinity()}");
+        
+        // 检查好感度是否达到100
+        if (target.GetAffinity() < 100)
+        {
+            yield return StartCoroutine(battleSystem.TypeDialog(
+                $"{target.pokemonName} 拒绝了！好感度不足！"));
+            yield return new WaitForSeconds(1f);
+            yield break;
+        }
+        
+        // 好感度满100，捕捉成功
+        yield return StartCoroutine(battleSystem.TypeDialog(
+            $"使用了捕捉道具..."));
+        yield return new WaitForSeconds(1f);
+        
+        yield return StartCoroutine(battleSystem.TypeDialog(
+            $"{target.pokemonName} 愿意跟你走了！"));
+        yield return new WaitForSeconds(1f);
+        
+        // 触发捕捉成功（会自动加入队伍）
+        battleSystem.OnCaptureSuccess();
+        
+        Debug.Log($"[GiftSystem] 成功捕捉 {target.pokemonName}！");
     }
     
     /// <summary>
@@ -114,6 +150,15 @@ public class GiftSystem : MonoBehaviour
         yield return StartCoroutine(battleSystem.TypeDialog(
             $"{mpig.pokemonName} 解锁了新技能！"));
         yield return new WaitForSeconds(0.5f);
+        
+        // 增加好感度：赠送绳子给M猪 +30
+        mpig.AddAffinity(30);
+        yield return StartCoroutine(battleSystem.TypeDialog(
+            $"{mpig.pokemonName} 的好感度上升了！"));
+        yield return new WaitForSeconds(0.5f);
+        
+        // 绿帽鱼获得一半好感度
+        AffinityManager.Instance.AddGreenHatFishAffinity(15);
         
         // 刷新战斗UI（如果需要）
         // battleSystem.RefreshBattleUI();
@@ -152,6 +197,15 @@ public class GiftSystem : MonoBehaviour
         yield return StartCoroutine(battleSystem.TypeDialog(
             $"{ssnake.pokemonName} 解锁了鞭打技能！"));
         yield return new WaitForSeconds(0.5f);
+        
+        // 增加好感度：赠送鞭子给S蛇 +30
+        ssnake.AddAffinity(30);
+        yield return StartCoroutine(battleSystem.TypeDialog(
+            $"{ssnake.pokemonName} 的好感度上升了！"));
+        yield return new WaitForSeconds(0.5f);
+        
+        // 绿帽鱼获得一半好感度
+        AffinityManager.Instance.AddGreenHatFishAffinity(15);
     }
     
     /// <summary>

@@ -13,9 +13,18 @@ public enum BattleState
     Escape
 }
 
+public enum BattleEndType
+{
+    Capture,    // 捕捉成功
+    Victory,    // 击败敌人
+    Defeat,     // 被击败
+    Escape      // 逃跑
+}
+
 public class BattleSystem : MonoBehaviour
 {
     public BattleState state;
+    private BattleEndType currentEndType;
     public GameObject playerPrefab;
     public GameObject enemyPrefab;
     public Transform playerPosition;
@@ -95,10 +104,38 @@ public class BattleSystem : MonoBehaviour
             giftSystem = gameObject.AddComponent<GiftSystem>();
             Debug.Log("[BattleSystem] 自动添加了 GiftSystem 组件");
         }
+        
+        // 延迟订阅绿帽鱼好感度变化事件（在 Start 中执行）
+    }
+    
+    private void OnDestroy()
+    {
+        // 取消订阅事件（只有在 AffinityManager 已经存在时才取消）
+        if (AffinityManager._instance != null)
+        {
+            AffinityManager._instance.OnGreenHatFishAffinityChanged -= UpdateGreenHatFishAffinityUI;
+            Debug.Log("[BattleSystem] 已取消订阅绿帽鱼好感度变化事件");
+        }
+    }
+    
+    /// <summary>
+    /// 更新绿帽鱼好感度UI
+    /// </summary>
+    private void UpdateGreenHatFishAffinityUI(int newAffinity)
+    {
+        if (greenHatAffinitySlider != null && greenHatAffinitySlider.gameObject.activeInHierarchy)
+        {
+            greenHatAffinitySlider.value = newAffinity;
+            Debug.Log($"[BattleSystem] 绿帽鱼好感度条已更新：{newAffinity}");
+        }
     }
     public void Start()
     {
         state = BattleState.Start;
+        
+        // 订阅绿帽鱼好感度变化事件
+        AffinityManager.Instance.OnGreenHatFishAffinityChanged += UpdateGreenHatFishAffinityUI;
+        Debug.Log("[BattleSystem] 已订阅绿帽鱼好感度变化事件");
         
         // 检查是否有来自 Claw 抓取的战斗初始化数据
         if (BattleInitializer.PlayerData != null && BattleInitializer.EnemyData != null)
@@ -246,10 +283,13 @@ public class BattleSystem : MonoBehaviour
         
         Vector3 scale = pokemon.transform.localScale;
         
-        // 玩家宝可梦（Player）默认朝右，其他宝可梦默认朝左
+        // 判断是否是玩家Prefab（只有"玩家"这个特殊Prefab默认朝右）
         bool isPlayerPrefab = pokemonData.data.displayName == "玩家" || 
                               pokemonData.data.displayName == "Player" ||
                               pokemonData.data.displayName == "player";
+        
+        // 判断是否是玩家的宝可梦（队伍中的宝可梦）
+        bool isPlayerOwnedPokemon = pokemonData.IsPlayerPokemon();
         
         if (isPlayerPrefab)
         {
@@ -274,7 +314,7 @@ public class BattleSystem : MonoBehaviour
             {
                 // 需要朝右 → 翻转
                 scale.x = Mathf.Abs(scale.x) * -1f;
-                Debug.Log($"[BattleSystem] {pokemon.name} 翻转朝右，Scale.x = {scale.x}");
+                Debug.Log($"[BattleSystem] {pokemon.name} 翻转朝右（玩家队伍），Scale.x = {scale.x}");
             }
             else
             {
@@ -565,6 +605,21 @@ public class BattleSystem : MonoBehaviour
                         Debug.Log($"[BattleSystem] 道具按钮{i + 1} 设置为: {toolItems[i].itemData.itemName}");
                     }
                 }
+                
+                // 添加点击事件监听器
+                Button buttonComponent = itemButtons[i].GetComponent<Button>();
+                if (buttonComponent != null)
+                {
+                    // 移除旧的监听器
+                    buttonComponent.onClick.RemoveAllListeners();
+                    
+                    // 捕获当前的 itemData
+                    ItemData itemData = toolItems[i].itemData;
+                    
+                    // 添加新的监听器
+                    buttonComponent.onClick.AddListener(() => UseItem(itemData));
+                    Debug.Log($"[BattleSystem] 道具按钮{i + 1} 已绑定点击事件");
+                }
             }
             else
             {
@@ -575,6 +630,161 @@ public class BattleSystem : MonoBehaviour
         }
         
         Debug.Log($"[BattleSystem] 道具按钮更新完成，显示 {Mathf.Min(toolItems.Count, 3)} 个道具");
+    }
+    
+    // ========== 道具使用系统 ==========
+    
+    /// <summary>
+    /// 使用道具（给自己的宝可梦用）
+    /// </summary>
+    private void UseItem(ItemData item)
+    {
+        if (state != BattleState.PlayerTurn)
+        {
+            Debug.LogWarning("[BattleSystem] 当前不是玩家回合，无法使用道具");
+            return;
+        }
+        
+        if (item == null)
+        {
+            Debug.LogError("[BattleSystem] 道具数据为空！");
+            return;
+        }
+        
+        Debug.Log($"[BattleSystem] 使用道具：{item.itemName}");
+        
+        // 开始道具使用流程
+        StartCoroutine(UseItemCoroutine(item));
+    }
+    
+    /// <summary>
+    /// 使用道具协程
+    /// </summary>
+    private IEnumerator UseItemCoroutine(ItemData item)
+    {
+        // 隐藏道具面板
+        yield return StartCoroutine(ShowPanelWithFade(rootPanel));
+        
+        bool shouldEndTurn = true; // 默认结束回合
+        
+        // 检查道具是否是捕捉道具
+        if (item.itemName == "Capture" || item.itemName == "捕捉道具" || item.itemName.Contains("捕捉"))
+        {
+            // 捕捉道具的逻辑
+            yield return ProcessCaptureItem(item);
+            // 捕捉成功会直接结束战斗，捕捉失败消耗道具并结束回合
+        }
+        // 检查是否是治疗道具
+        else if (item.healAmount > 0)
+        {
+            // 治疗道具的逻辑
+            yield return ProcessHealItem(item);
+        }
+        else
+        {
+            yield return StartCoroutine(TypeDialog($"使用了 {item.itemName}！"));
+            yield return new WaitForSeconds(1f);
+        }
+        
+        // 刷新道具按钮
+        UpdateItemButtons();
+        
+        // 如果战斗还在继续（捕捉成功会改变state），切换到敌人回合
+        if (state == BattleState.PlayerTurn && shouldEndTurn)
+        {
+            yield return new WaitForSeconds(0.5f);
+            state = BattleState.EnemyTurn;
+            StartCoroutine(EnemyTurn());
+        }
+    }
+    
+    /// <summary>
+    /// 处理捕捉道具
+    /// </summary>
+    private IEnumerator ProcessCaptureItem(ItemData item)
+    {
+        Debug.Log($"[BattleSystem] 使用捕捉道具捕捉 {enemyPokemon.pokemonName}");
+        
+        // 检查好感度是否达到100
+        if (enemyPokemon.GetAffinity() < 100)
+        {
+            // 消耗道具
+            if (!ItemInventory.Instance.RemoveItemByID(item.itemID, 1))
+            {
+                Debug.LogWarning($"[BattleSystem] 无法从背包移除道具：{item.itemName}");
+                yield return StartCoroutine(TypeDialog("道具不足！"));
+                yield break;
+            }
+            
+            yield return StartCoroutine(TypeDialog($"使用了 {item.itemName}！"));
+            yield return new WaitForSeconds(1f);
+            
+            yield return StartCoroutine(TypeDialog($"{enemyPokemon.pokemonName} 挣脱了！好感度不足！"));
+            yield return new WaitForSeconds(1f);
+            yield break;
+        }
+        
+        // 好感度满100，捕捉成功
+        // 消耗道具
+        if (!ItemInventory.Instance.RemoveItemByID(item.itemID, 1))
+        {
+            Debug.LogWarning($"[BattleSystem] 无法从背包移除道具：{item.itemName}");
+            yield return StartCoroutine(TypeDialog("道具不足！"));
+            yield break;
+        }
+        
+        yield return StartCoroutine(TypeDialog($"使用了 {item.itemName}！"));
+        yield return new WaitForSeconds(1f);
+        
+        yield return StartCoroutine(TypeDialog($"{enemyPokemon.pokemonName} 愿意跟你走了！"));
+        yield return new WaitForSeconds(1f);
+        
+        // 触发捕捉成功
+        OnCaptureSuccess();
+    }
+    
+    /// <summary>
+    /// 处理治疗道具
+    /// </summary>
+    private IEnumerator ProcessHealItem(ItemData item)
+    {
+        Debug.Log($"[BattleSystem] 使用治疗道具恢复 {playerPokemon.pokemonName} 的HP");
+        
+        // 检查玩家宝可梦是否已满HP
+        if (playerPokemon.currentHP >= playerPokemon.pokemonHP)
+        {
+            yield return StartCoroutine(TypeDialog($"{playerPokemon.pokemonName} 的HP已满！"));
+            yield return new WaitForSeconds(1f);
+            yield break;
+        }
+        
+        // 消耗道具
+        if (!ItemInventory.Instance.RemoveItemByID(item.itemID, 1))
+        {
+            Debug.LogWarning($"[BattleSystem] 无法从背包移除道具：{item.itemName}");
+            yield return StartCoroutine(TypeDialog("道具不足！"));
+            yield break;
+        }
+        
+        yield return StartCoroutine(TypeDialog($"使用了 {item.itemName}！"));
+        yield return new WaitForSeconds(0.5f);
+        
+        // 播放治疗动画
+        if (animationManager != null)
+        {
+            yield return StartCoroutine(animationManager.PlaySkillAnimation(
+                SkillType.Heal,
+                playerPokemon,
+                playerPokemon
+            ));
+        }
+        
+        // 恢复HP
+        int actualHeal = playerPokemon.Heal(item.healAmount);
+        
+        yield return StartCoroutine(TypeDialog($"{playerPokemon.pokemonName} 恢复了 {actualHeal} HP！"));
+        playerHUD.SetHP(playerPokemon.currentHP);
+        yield return new WaitForSeconds(1f);
     }
     
     /// <summary>
@@ -838,13 +1048,24 @@ public class BattleSystem : MonoBehaviour
                     enemyHUD.SetHP(enemyPokemon.currentHP);
                     yield return new WaitForSeconds(1f);
                     
+                    // 检查好感度触发：对M猪使用鞭打 +20好感度
+                    if (skill.skillType == SkillType.WhipAttack && 
+                        (enemyPokemon.data.displayName.Contains("M猪") || enemyPokemon.data.displayName.Contains("MPig")))
+                    {
+                        enemyPokemon.AddAffinity(20);
+                        yield return StartCoroutine(TypeDialog($"{enemyPokemon.pokemonName} 的好感度上升了！"));
+                        yield return new WaitForSeconds(0.5f);
+                        
+                        // 绿帽鱼获得一半好感度
+                        AffinityManager.Instance.AddGreenHatFishAffinity(10);
+                    }
+                    
                     // 检查敌方是否死亡
                     if (enemyPokemon.currentHP <= 0)
                     {
-                        state = BattleState.Won;
                         yield return StartCoroutine(TypeDialog($"野生的 {enemyPokemon.pokemonName} 倒下了！"));
                         yield return new WaitForSeconds(2f);
-                        EndBattle();
+                        OnEnemyDefeated();
                         yield break;
                     }
                 }
@@ -942,15 +1163,46 @@ public class BattleSystem : MonoBehaviour
                     playerHUD.SetHP(playerPokemon.currentHP);
                     yield return new WaitForSeconds(1f);
                     
+                    // 检查好感度触发：S蛇鞭打玩家方的任意宝可梦（包括玩家、M猪等队伍成员）
+                    if (enemySkill.skillType == SkillType.WhipAttack && 
+                        (enemyPokemon.data.displayName.Contains("S蛇") || enemyPokemon.data.displayName.Contains("SSnake")))
+                    {
+                        enemyPokemon.AddAffinity(20);
+                        yield return StartCoroutine(TypeDialog($"{enemyPokemon.pokemonName} 的好感度上升了！"));
+                        yield return new WaitForSeconds(0.5f);
+                        
+                        // 绿帽鱼获得一半好感度
+                        AffinityManager.Instance.AddGreenHatFishAffinity(10);
+                    }
+                    
                     // 检查玩家是否死亡
                     if (playerPokemon.currentHP <= 0)
                     {
-                        state = BattleState.Lost;
                         yield return StartCoroutine(TypeDialog($"{playerPokemon.pokemonName} 倒下了！"));
                         yield return new WaitForSeconds(2f);
-                        EndBattle();
+                        
+                        // 更新 PlayerPokemonData 中的 HP
+                        PlayerPokemonData pData = playerPokemon.GetPlayerData();
+                        if (pData != null)
+                        {
+                            pData.currentHP = 0;
+                        }
+                        
+                        // 检查是否还有其他存活的宝可梦
+                        yield return StartCoroutine(CheckAndSwitchPokemon());
                         yield break;
                     }
+                }
+                // 检查好感度触发：S蛇使用防御姿态
+                else if (enemySkill.skillType == SkillType.DefenseStance && 
+                         (enemyPokemon.data.displayName.Contains("S蛇") || enemyPokemon.data.displayName.Contains("SSnake")))
+                {
+                    enemyPokemon.AddAffinity(20);
+                    yield return StartCoroutine(TypeDialog($"{enemyPokemon.pokemonName} 的好感度上升了！"));
+                    yield return new WaitForSeconds(0.5f);
+                    
+                    // 绿帽鱼获得一半好感度
+                    AffinityManager.Instance.AddGreenHatFishAffinity(10);
                 }
             }
         }
@@ -1201,5 +1453,232 @@ public class BattleSystem : MonoBehaviour
                 greenHatAffinitySlider.gameObject.SetActive(false);
             }
         }
+    }
+    
+    /// <summary>
+    /// 捕捉成功回调
+    /// </summary>
+    public void OnCaptureSuccess()
+    {
+        // 将捕获的宝可梦加入队伍
+        if (enemyPokemon != null && enemyPokemon.data != null)
+        {
+            AddCapturedPokemonToParty(enemyPokemon);
+        }
+        
+        currentEndType = BattleEndType.Capture;
+        state = BattleState.Won;
+        ShowEndBattlePanelWithMessage("牵手成功");
+    }
+    
+    /// <summary>
+    /// 将捕获的宝可梦加入队伍
+    /// </summary>
+    private void AddCapturedPokemonToParty(PokemonFromData capturedPokemon)
+    {
+        if (PlayerInventory.Instance == null)
+        {
+            Debug.LogError("[BattleSystem] PlayerInventory.Instance 为空！无法添加宝可梦到队伍");
+            return;
+        }
+        
+        // 创建新的 PlayerPokemonData（保存当前状态）
+        PlayerPokemonData newPokemon = new PlayerPokemonData(capturedPokemon.data, 5);
+        
+        // 保存当前HP（而不是满HP）
+        newPokemon.currentHP = capturedPokemon.currentHP;
+        
+        // 保存当前学会的技能（包括解锁的技能，如M猪的嘲讽）
+        newPokemon.learnedSkills.Clear();
+        newPokemon.skillCurrentPP.Clear();
+        
+        foreach (var skill in capturedPokemon.GetSkills())
+        {
+            if (skill != null && skill.data != null)
+            {
+                newPokemon.learnedSkills.Add(skill.data);
+                newPokemon.skillCurrentPP.Add(skill.data.maxPP); // 捕获后PP恢复满
+            }
+        }
+        
+        // 添加到队伍或仓库
+        if (PlayerInventory.Instance.AddToParty(newPokemon))
+        {
+            Debug.Log($"[BattleSystem] {capturedPokemon.pokemonName} 已加入队伍！（当前HP: {newPokemon.currentHP}/{capturedPokemon.data.baseHP}）");
+        }
+        else
+        {
+            // 队伍满了，放入仓库
+            PlayerInventory.Instance.pokemonStorage.Add(newPokemon);
+            Debug.Log($"[BattleSystem] 队伍已满，{capturedPokemon.pokemonName} 已放入仓库！");
+        }
+    }
+    
+    /// <summary>
+    /// 逃跑按钮回调
+    /// </summary>
+    public void OnEscapeButton()
+    {
+        Debug.Log("[BattleSystem] 玩家选择逃跑");
+        currentEndType = BattleEndType.Escape;
+        state = BattleState.Escape;
+        ShowEndBattlePanelWithMessage("逃跑成功");
+    }
+    
+    /// <summary>
+    /// 显示战斗结束面板（带消息）
+    /// </summary>
+    private void ShowEndBattlePanelWithMessage(string message)
+    {
+        Debug.Log($"[BattleSystem] 显示战斗结束面板：{message}");
+        
+        // 隐藏所有其他面板
+        if (rootPanel != null) SetPanel(rootPanel, false, 0f);
+        if (skillsPanel != null) SetPanel(skillsPanel, false, 0f);
+        if (itemsPanel != null) SetPanel(itemsPanel, false, 0f);
+        if (giftsPanel != null) SetPanel(giftsPanel, false, 0f);
+        
+        // 查找 EndBattlePanel
+        GameObject endBattlePanelObj = GameObject.Find("EndBattlePanel");
+        if (endBattlePanelObj != null)
+        {
+            // 设置文本内容
+            TextMeshProUGUI endText = endBattlePanelObj.GetComponentInChildren<TextMeshProUGUI>();
+            if (endText != null)
+            {
+                endText.text = message;
+                Debug.Log($"[BattleSystem] EndBattlePanel 文本已设置为：{message}");
+            }
+            else
+            {
+                Debug.LogWarning("[BattleSystem] 未找到 EndBattlePanel 中的 TextMeshProUGUI 组件");
+            }
+            
+            // 显示面板
+            CanvasGroup endBattleCG = endBattlePanelObj.GetComponent<CanvasGroup>();
+            if (endBattleCG != null)
+            {
+                SetPanel(endBattleCG, true, 0.5f);
+                Debug.Log("[BattleSystem] EndBattlePanel 已显示");
+            }
+            else
+            {
+                endBattlePanelObj.SetActive(true);
+                Debug.Log("[BattleSystem] EndBattlePanel 已激活（无CanvasGroup）");
+            }
+        }
+        else
+        {
+            Debug.LogError("[BattleSystem] 未找到 EndBattlePanel！");
+        }
+    }
+    
+    /// <summary>
+    /// 检查并切换宝可梦
+    /// </summary>
+    private IEnumerator CheckAndSwitchPokemon()
+    {
+        // 检查队伍中是否还有存活的宝可梦
+        if (PlayerInventory.Instance == null)
+        {
+            Debug.LogError("[BattleSystem] PlayerInventory.Instance 为空！");
+            OnPlayerDefeated();
+            yield break;
+        }
+        
+        PlayerPokemonData nextPokemon = PlayerInventory.Instance.GetFirstAlivePokemon();
+        PlayerPokemonData currentData = playerPokemon.GetPlayerData();
+        
+        if (nextPokemon != null && nextPokemon != currentData)
+        {
+            // 还有存活的宝可梦，自动派出
+            yield return StartCoroutine(TypeDialog($"派出下一只宝可梦..."));
+            yield return new WaitForSeconds(1f);
+            
+            // 切换宝可梦
+            SwitchPlayerPokemon(nextPokemon);
+            
+            yield return StartCoroutine(TypeDialog($"上场了，{playerPokemon.pokemonName}！"));
+            yield return new WaitForSeconds(1f);
+            
+            // 继续战斗，切换到玩家回合
+            state = BattleState.PlayerTurn;
+            SetPanel(rootPanel, true, 0.5f);
+        }
+        else
+        {
+            // 没有存活的宝可梦了，战斗失败
+            OnPlayerDefeated();
+        }
+    }
+    
+    /// <summary>
+    /// 切换玩家宝可梦
+    /// </summary>
+    private void SwitchPlayerPokemon(PlayerPokemonData newPokemonData)
+    {
+        if (newPokemonData == null)
+        {
+            Debug.LogError("[BattleSystem] 要切换的宝可梦数据为空！");
+            return;
+        }
+        
+        // 销毁旧的宝可梦实例
+        if (playerPokemon != null && playerPokemon.gameObject != null)
+        {
+            Destroy(playerPokemon.gameObject);
+        }
+        
+        // 获取宝可梦的 Prefab
+        GameObject prefabToUse = GetPlayerPrefab(newPokemonData);
+        if (prefabToUse == null)
+        {
+            Debug.LogError($"[BattleSystem] 找不到 {newPokemonData.GetDisplayName()} 的 Prefab");
+            return;
+        }
+        
+        // 实例化新的宝可梦
+        GameObject playerInstance = Instantiate(prefabToUse, playerPosition.position, Quaternion.identity);
+        playerPokemon = playerInstance.GetComponent<PokemonFromData>();
+        
+        if (playerPokemon == null)
+        {
+            Debug.LogError($"[BattleSystem] {prefabToUse.name} 没有 PokemonFromData 组件");
+            return;
+        }
+        
+        // 初始化为玩家宝可梦
+        playerPokemon.InitializeAsPlayer(newPokemonData);
+        
+        // 设置朝向（玩家方的宝可梦都朝右）
+        SetPokemonFacing(playerInstance, true);
+        
+        // 更新HUD
+        playerHUD.SetHUD(playerPokemon);
+        
+        // 更新技能按钮
+        UpdateSkillButtons();
+        
+        Debug.Log($"[BattleSystem] 已切换到 {playerPokemon.pokemonName}（HP: {playerPokemon.currentHP}/{playerPokemon.pokemonHP}）");
+    }
+    
+    /// <summary>
+    /// 玩家被击败回调
+    /// </summary>
+    public void OnPlayerDefeated()
+    {
+        currentEndType = BattleEndType.Defeat;
+        state = BattleState.Lost;
+        ShowEndBattlePanelWithMessage("被击败了");
+    }
+    
+    /// <summary>
+    /// 击败敌人回调
+    /// </summary>
+    public void OnEnemyDefeated()
+    {
+        currentEndType = BattleEndType.Victory;
+        state = BattleState.Won;
+        ShowEndBattlePanelWithMessage("击败了对手");
     }
 }

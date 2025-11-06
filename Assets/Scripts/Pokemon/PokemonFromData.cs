@@ -428,7 +428,8 @@ public class PokemonFromData : MonoBehaviour
 	{
 		if (affinitySlider != null)
 		{
-			affinitySlider.value = GetAffinity() / 100f;
+			// 由于 maxValue 是 100，直接使用好感度值（不需要除以100）
+			affinitySlider.value = GetAffinity();
 		}
 	}
 	
@@ -458,10 +459,11 @@ public class PokemonFromData : MonoBehaviour
 	{
 		if (affinitySlider != null)
 		{
-			affinitySlider.maxValue = 1f;
+			affinitySlider.maxValue = 100f;  // 好感度范围是 0-100
 			affinitySlider.minValue = 0f;
 			affinitySlider.gameObject.SetActive(true); // 显示好感度条
 			UpdateAffinityUI();
+			Debug.Log($"[{pokemonName}] 好感度条已初始化，maxValue=100");
 		}
 	}
 }

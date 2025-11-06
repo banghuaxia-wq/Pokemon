@@ -28,6 +28,9 @@ public class ItemInventory : MonoBehaviour
     
     [Tooltip("初始鞭子数据")]
     public ItemData whipData;
+    
+    [Tooltip("初始捕捉道具数据")]
+    public ItemData captureData;
 
     [Header("容量设置")]
     [Tooltip("仓库容量")]
@@ -92,18 +95,25 @@ public class ItemInventory : MonoBehaviour
             Debug.Log("[ItemInventory] 已添加初始物品: 回血药 x99");
         }
 
-        // 仓库第二格：1个绳子
+        // 仓库第二格：99个绳子
         if (ropeData != null)
         {
-            warehouseItems[1] = new ItemSlotData(ropeData, 1);
-            Debug.Log("[ItemInventory] 已添加初始物品: 绳子 x1");
+            warehouseItems[1] = new ItemSlotData(ropeData, 99);
+            Debug.Log("[ItemInventory] 已添加初始物品: 绳子 x99");
         }
 
-        // 仓库第三格：1个鞭子
+        // 仓库第三格：99个鞭子
         if (whipData != null)
         {
-            warehouseItems[2] = new ItemSlotData(whipData, 1);
-            Debug.Log("[ItemInventory] 已添加初始物品: 鞭子 x1");
+            warehouseItems[2] = new ItemSlotData(whipData, 99);
+            Debug.Log("[ItemInventory] 已添加初始物品: 鞭子 x99");
+        }
+        
+        // 仓库第四格：99个捕捉道具
+        if (captureData != null)
+        {
+            warehouseItems[3] = new ItemSlotData(captureData, 99);
+            Debug.Log("[ItemInventory] 已添加初始物品: 捕捉道具 x99");
         }
     }
 

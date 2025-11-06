@@ -19,6 +19,6 @@ MonoBehaviour:
   baseAttack: 200
   baseDefense: 10
   skills:
-  - {fileID: 11400000, guid: f393f9283b2982043aa8b9fd5cdbeb32, type: 2}
+  - {fileID: 11400000, guid: 017d02f6703dafc438168b1f4ff4fac0, type: 2}
   - {fileID: 0}
   - {fileID: 0}

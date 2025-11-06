@@ -1174,7 +1174,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1092487303}
         m_TargetAssemblyTypeName: BattleSystem, Assembly-CSharp
-        m_MethodName: ReturnToUITest
+        m_MethodName: OnEscapeButton
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
