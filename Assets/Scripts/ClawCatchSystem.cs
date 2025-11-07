@@ -142,17 +142,13 @@ public class ClawCatchSystem : MonoBehaviour
         
         if (isBossBattle)
         {
-            DebugLog($"[ClawCatchSystem] 检测到 Boss 战 - {caughtPokemonData.displayName}");
+            DebugLog($"[ClawCatchSystem] 检测到 Boss 战 - {caughtPokemonData.displayName}，进入多人战斗场景");
             
-            // TODO: 多人战斗暂未搭建，显示提示
-            Debug.LogWarning("[ClawCatchSystem] Boss 战斗场景暂未搭建！");
+            // 设置多人战斗数据
+            BattleInitializer.SetupMultiBattle(playerPokemon, caughtPokemonData);
             
-            // 暂时不进入战斗
-            // BattleInitializer.SetupMultiBattle(playerPokemon, caughtPokemonData);
-            // SceneManager.LoadScene("MultiBattleScene");
-            
-            isProcessingCatch = false;
-            return;
+            // 加载多人战斗场景
+            SceneManager.LoadScene("MultiBattleScene");
         }
         else
         {
@@ -161,7 +157,7 @@ public class ClawCatchSystem : MonoBehaviour
             // 设置单人战斗数据
             BattleInitializer.SetupSingleBattle(playerPokemon, caughtPokemonData);
             
-            // 加载战斗场景
+            // 加载单人战斗场景
             SceneManager.LoadScene("SingleBattleScene");
         }
     }
