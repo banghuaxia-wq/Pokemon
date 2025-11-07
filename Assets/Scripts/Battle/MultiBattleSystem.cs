@@ -50,6 +50,7 @@ public class MultiBattleSystem : MonoBehaviour
     [SerializeField] private CanvasGroup itemsPanel;
     [SerializeField] private CanvasGroup giftsPanel;
     [SerializeField] private CanvasGroup endBattlePanel;
+    public GameObject endBattlePanelLose;
     [SerializeField] private CanvasGroup targetSelectionPanel; // 目标选择面板
     private CanvasGroup[] allPanels;
     
@@ -94,6 +95,7 @@ public class MultiBattleSystem : MonoBehaviour
     
     // 当前轮到的单位
     private BattleUnit currentUnit;
+    private bool playerActionCompleted;
     
     private void Awake()
     {
@@ -111,6 +113,7 @@ public class MultiBattleSystem : MonoBehaviour
     
     private void Start()
     {
+        endBattlePanelLose.SetActive(false);
         // 检查EventSystem
         UnityEngine.EventSystems.EventSystem eventSystem = FindObjectOfType<UnityEngine.EventSystems.EventSystem>();
         if (eventSystem == null)
@@ -526,13 +529,21 @@ public class MultiBattleSystem : MonoBehaviour
         yield return new WaitForSeconds(0.1f); // 等待面板完全显示
         DebugCheckButtons();
         
-        // 等待玩家选择技能和目标（通过按钮回调触发）
-        yield return new WaitUntil(() => !isBattleActive || (currentUnit.selectedSkill != null && currentUnit.selectedTarget != null));
-        
-        if (currentUnit.selectedSkill != null)
+        // 等待玩家选择技能和目标，或通过礼物/道具结束回合
+        playerActionCompleted = false;
+        yield return new WaitUntil(() => !isBattleActive || playerActionCompleted || (currentUnit.selectedSkill != null && currentUnit.selectedTarget != null));
+
+        if (!playerActionCompleted && currentUnit.selectedSkill != null)
         {
             yield return StartCoroutine(ExecuteSkill(currentUnit, currentUnit.selectedSkill));
             currentUnit.selectedSkill = null;
+        }
+
+        if (playerActionCompleted)
+        {
+            currentUnit.selectedSkill = null;
+            currentUnit.selectedTarget = null;
+            playerActionCompleted = false;
         }
     }
     
@@ -756,13 +767,15 @@ public class MultiBattleSystem : MonoBehaviour
         if (!playerSideAlive)
         {
             isBattleActive = false;
-            ShowEndBattlePanel("战斗失败...");
+            endBattlePanelLose.SetActive(true);
+            //ShowEndBattlePanel("战斗失败...");
             return true;
         }
         
         if (!enemySideAlive)
         {
             isBattleActive = false;
+            
             ShowEndBattlePanel("战斗胜利！");
             return true;
         }
@@ -1206,7 +1219,9 @@ public class MultiBattleSystem : MonoBehaviour
                     Debug.Log($"[MultiBattleSystem] 使用道具：{itemSlot.itemData.itemName}，恢复HP：{healAmount}");
                     
                     // 结束回合
-                    currentUnit.selectedSkill = null; // 标记为已行动
+                    currentUnit.selectedSkill = null;
+                    currentUnit.selectedTarget = null;
+                    playerActionCompleted = true;
                     SwitchPanel(null);
                 }
             }
@@ -1373,6 +1388,8 @@ public class MultiBattleSystem : MonoBehaviour
                     
                     // 结束回合
                     currentUnit.selectedSkill = null;
+                    currentUnit.selectedTarget = null;
+                    playerActionCompleted = true;
                     SwitchPanel(null);
                 }
             }
