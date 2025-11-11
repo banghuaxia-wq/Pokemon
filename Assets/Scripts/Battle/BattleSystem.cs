@@ -1038,6 +1038,10 @@ public class BattleSystem : MonoBehaviour
         {
             case SkillType.TackleAttack:
             case SkillType.WhipAttack:
+                if (skill.skillType == SkillType.WhipAttack)
+                {
+                    GlobalAudioManager.Instance?.PlayWhipSfx();
+                }
                 // 攻击技能：计算并造成伤害
                 int damage = CalculateDamage(playerPokemon, enemyPokemon, skill);
                 
@@ -1073,6 +1077,7 @@ public class BattleSystem : MonoBehaviour
             
             case SkillType.Heal:
                 // 治疗技能：恢复HP（治疗自己）
+                GlobalAudioManager.Instance?.PlayHealSfx();
                 int healAmount = skill.power;
                 if (healAmount > 0)
                 {
@@ -1156,6 +1161,10 @@ public class BattleSystem : MonoBehaviour
                 // 结算伤害
                 if (enemySkill.skillType == SkillType.TackleAttack || enemySkill.skillType == SkillType.WhipAttack)
                 {
+                    if (enemySkill.skillType == SkillType.WhipAttack)
+                    {
+                        GlobalAudioManager.Instance?.PlayWhipSfx();
+                    }
                     int damage = CalculateDamage(enemyPokemon, playerPokemon, enemySkill);
                     playerPokemon.TakeDamage(damage);
                     

@@ -113,7 +113,10 @@ public class MultiBattleSystem : MonoBehaviour
     
     private void Start()
     {
-        endBattlePanelLose.SetActive(false);
+        if (endBattlePanelLose != null)
+        {
+            endBattlePanelLose.SetActive(false);
+        }
         // 检查EventSystem
         UnityEngine.EventSystems.EventSystem eventSystem = FindObjectOfType<UnityEngine.EventSystems.EventSystem>();
         if (eventSystem == null)
@@ -674,6 +677,15 @@ public class MultiBattleSystem : MonoBehaviour
             Debug.LogWarning("[MultiBattleSystem] 目标为空或没有宝可梦数据，终止此次技能执行");
             yield return StartCoroutine(TypeDialog("技能没有命中任何目标！"));
             yield break;
+        }
+
+        if (skill.skillType == SkillType.WhipAttack)
+        {
+            GlobalAudioManager.Instance?.PlayWhipSfx();
+        }
+        else if (skill.skillType == SkillType.Heal)
+        {
+            GlobalAudioManager.Instance?.PlayHealSfx();
         }
 
         // 计算伤害
